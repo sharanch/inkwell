@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: inkwell
+    orgId: 1
+    folder: Inkwell
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards
