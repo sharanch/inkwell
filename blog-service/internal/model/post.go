@@ -14,7 +14,6 @@ const (
 )
 
 type Post struct {
-	PublishedAt *time.Time     `db:"published_at" json:"published_at"`
 	Tags        pq.StringArray `db:"tags"         json:"tags"`
 	ID          string         `db:"id"           json:"id"`
 	AuthorID    string         `db:"author_id"    json:"author_id"`
@@ -27,6 +26,7 @@ type Post struct {
 	Visibility  Visibility     `db:"visibility"   json:"visibility"`
 	CreatedAt   time.Time      `db:"created_at"   json:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at"   json:"updated_at"`
+	PublishedAt *time.Time     `db:"published_at" json:"published_at"`
 	LikesCount  int            `db:"likes_count"  json:"likes_count"`
 	ViewsCount  int            `db:"views_count"  json:"views_count"`
 	ReadingMins int            `db:"reading_mins" json:"reading_mins"`
