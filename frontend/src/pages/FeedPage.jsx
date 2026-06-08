@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { feedApi } from '../api/client'
 import PostCard from '../components/blog/PostCard'
 import InterestsModal from '../components/feed/InterestsModal'

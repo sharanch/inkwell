@@ -4,6 +4,8 @@ import { blogApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/layout/Navbar'
 
+const SKELETON_WIDTHS = [82, 91, 78, 95, 87, 75, 93, 80]
+
 export default function PostDetailPage() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -53,8 +55,8 @@ export default function PostDetailPage() {
           <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
           <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4" />
           <div className="space-y-2 pt-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 dark:bg-gray-800 rounded" style={{ width: `${75 + Math.random() * 25}%` }} />
+            {SKELETON_WIDTHS.map((w, i) => (
+              <div key={i} className="h-4 bg-gray-200 dark:bg-gray-800 rounded" style={{ width: `${w}%` }} />
             ))}
           </div>
         </div>

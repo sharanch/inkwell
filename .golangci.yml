@@ -1,0 +1,45 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck       # unchecked errors
+    - govet          # go vet checks
+    - staticcheck    # staticanalysis (SA*, S*, QF*)
+    - ineffassign    # assigned but never used
+    - unused         # unused code
+    - gosimple       # simplification suggestions
+    - gofmt          # formatting
+    - goimports      # import ordering
+    - misspell       # common spelling mistakes
+
+linters-settings:
+  errcheck:
+    # Ignore error returns from common safe calls
+    exclude-functions:
+      - (io.Closer).Close
+      - (*database/sql.Rows).Close
+      - (*database/sql.Stmt).Close
+      - fmt.Fprint
+      - fmt.Fprintf
+      - fmt.Fprintln
+  govet:
+    enable-all: true
+    disable:
+      - shadow       # too noisy in handler code
+  gofmt:
+    simplify: true
+
+issues:
+  exclude-rules:
+    # Table-driven test files are verbose by design
+    - path: "_test\\.go"
+      linters:
+        - errcheck
+  # Don't fail on generated files
+  exclude-dirs:
+    - vendor
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -190,7 +189,7 @@ func jwtMiddleware(secret string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			bearer := r.Header.Get("Authorization")
 			tokenStr := strings.TrimPrefix(bearer, "Bearer ")
-			if tokenStr == ""  {
+			if tokenStr == "" {
 				writeError(w, http.StatusUnauthorized, "authorization required")
 				return
 			}
@@ -251,12 +250,6 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
-}
-
-// drain discards a response body.
-func drain(r io.ReadCloser) {
-	io.Copy(io.Discard, r)
-	r.Close()
 }
 
 func getEnv(key, fallback string) string {

@@ -238,10 +238,3 @@ func slugify(title string) string {
 	}
 	return strings.Trim(s, "-")
 }
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
