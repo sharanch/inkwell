@@ -48,7 +48,9 @@ func main() {
 	}))
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"status":"ok","service":"blog"}`))
+		if _, err := w.Write([]byte(`{"status":"ok","service":"blog"}`)); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	r.Route("/api/v1/posts", func(r chi.Router) {
@@ -78,7 +80,9 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	srv.Shutdown(ctx)
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("server shutdown error: %v", err)
+	}
 }
 
 func getEnv(key, fallback string) string {

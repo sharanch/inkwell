@@ -10,8 +10,8 @@ import (
 )
 
 type BlogService struct {
-	repo   *repository.PostRepository
-	feed   *FeedClient
+	repo *repository.PostRepository
+	feed *FeedClient
 }
 
 func NewBlogService(repo *repository.PostRepository, feed *FeedClient) *BlogService {

@@ -10,8 +10,8 @@ import (
 )
 
 type FeedClient struct {
-	baseURL    string
 	httpClient *http.Client
+	baseURL    string
 }
 
 func NewFeedClient(baseURL string) *FeedClient {

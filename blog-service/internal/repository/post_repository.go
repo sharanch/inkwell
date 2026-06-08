@@ -163,7 +163,9 @@ func (r *PostRepository) List(ctx context.Context, q *model.ListPostsQuery) (*mo
 	offset := (q.Page - 1) * q.PageSize
 
 	var total int
-	r.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM posts WHERE "+clause, args...).Scan(&total)
+	if err := r.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM posts WHERE "+clause, args...).Scan(&total); err != nil {
+		return nil, fmt.Errorf("count query: %w", err)
+	}
 
 	rows, err := r.db.QueryxContext(ctx,
 		fmt.Sprintf("SELECT * FROM posts WHERE %s ORDER BY created_at DESC LIMIT $%d OFFSET $%d", clause, i, i+1),
@@ -188,20 +190,33 @@ func (r *PostRepository) List(ctx context.Context, q *model.ListPostsQuery) (*mo
 
 func (r *PostRepository) ToggleLike(ctx context.Context, postID, userID string) (bool, error) {
 	var exists bool
-	r.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM post_likes WHERE post_id=$1 AND user_id=$2)`, postID, userID).Scan(&exists)
+	if err := r.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM post_likes WHERE post_id=$1 AND user_id=$2)`, postID, userID).Scan(&exists); err != nil {
+		return false, fmt.Errorf("check like: %w", err)
+	}
 
 	if exists {
-		r.db.ExecContext(ctx, `DELETE FROM post_likes WHERE post_id=$1 AND user_id=$2`, postID, userID)
-		r.db.ExecContext(ctx, `UPDATE posts SET likes_count = likes_count - 1 WHERE id=$1`, postID)
+		if _, err := r.db.ExecContext(ctx, `DELETE FROM post_likes WHERE post_id=$1 AND user_id=$2`, postID, userID); err != nil {
+			return false, fmt.Errorf("delete like: %w", err)
+		}
+		if _, err := r.db.ExecContext(ctx, `UPDATE posts SET likes_count = likes_count - 1 WHERE id=$1`, postID); err != nil {
+			return false, fmt.Errorf("decrement likes: %w", err)
+		}
 		return false, nil
 	}
-	r.db.ExecContext(ctx, `INSERT INTO post_likes(post_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING`, postID, userID)
-	r.db.ExecContext(ctx, `UPDATE posts SET likes_count = likes_count + 1 WHERE id=$1`, postID)
+	if _, err := r.db.ExecContext(ctx, `INSERT INTO post_likes(post_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING`, postID, userID); err != nil {
+		return false, fmt.Errorf("insert like: %w", err)
+	}
+	if _, err := r.db.ExecContext(ctx, `UPDATE posts SET likes_count = likes_count + 1 WHERE id=$1`, postID); err != nil {
+		return false, fmt.Errorf("increment likes: %w", err)
+	}
 	return true, nil
 }
 
 func (r *PostRepository) IncrementView(ctx context.Context, postID string) {
-	r.db.ExecContext(ctx, `UPDATE posts SET views_count = views_count + 1 WHERE id=$1`, postID)
+	if _, err := r.db.ExecContext(ctx, `UPDATE posts SET views_count = views_count + 1 WHERE id=$1`, postID); err != nil {
+		// fire-and-forget: log but don't propagate
+		_ = err
+	}
 }
 
 // GetByIDs fetches multiple posts for the feed service.
@@ -219,7 +234,9 @@ func (r *PostRepository) GetByIDs(ctx context.Context, ids []string) ([]*model.P
 	posts := []*model.Post{}
 	for rows.Next() {
 		p := &model.Post{}
-		rows.StructScan(p)
+		if err := rows.StructScan(p); err != nil {
+			return nil, fmt.Errorf("scan post: %w", err)
+		}
 		posts = append(posts, p)
 	}
 	return posts, nil
